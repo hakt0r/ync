@@ -46,7 +46,7 @@ class Sync extends events.EventEmitter
         ), 0
     else @chain[rule].apply this,args
 
-  continue : ->
+  proceed : ->
     if @current is @last()
       args = v for k,v of arguments
       return @emit.apply this, ['done'].concat args

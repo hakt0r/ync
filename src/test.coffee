@@ -34,19 +34,19 @@ sequence = -> new Sync
 
   list_dir : ->
     cp.exec "echo SECRET_CODE", (e,s,m) =>
-      @continue(s)
+      @proceed(s)
   sleep : (data) ->
     cp.exec "sleep 0.5", =>
-      @continue(data)
+      @proceed(data)
   output : (data) ->
-    @continue data
+    @proceed data
 
 tests = new Sync
   fork  : yes
 
   start : ->
     @count = 0; @success = 0
-    @continue()
+    @proceed()
 
   chain : ->
     stack = sequence()
@@ -56,18 +56,18 @@ tests = new Sync
         tests.success++
         return console.log "Test success:".green,"simple_chain"
       else return console.log "Test fail:".red,"simple_chain"
-    @continue()
+    @proceed()
 
   insertion : ->
     stack = sequence()
-    stack.insertAfter "sleep", "inject", (data) -> @continue data + " and stuff"
+    stack.insertAfter "sleep", "inject", (data) -> @proceed data + " and stuff"
     tests.count++
     stack.on 'done', (data) =>
       if data.trim() is "SECRET_CODE\n and stuff"
         tests.success++
         console.log "Test success:".green,"insertion"
       else console.log "Test fail:".red,"insertion"
-      @continue()
+      @proceed()
 
   done : ->
     @count++; @success++

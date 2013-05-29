@@ -5,23 +5,36 @@
     $ sudo npm install -g git://github.com/hakt0r/ync.git
 
 ### Node.JS Usage:
-    Sync = require('ync')
-    s = new Sync({
-      "step1" : function(){
-        this.continue(123);
+    var Sync = require('ync');
+
+    var s = new Sync({
+      step1 : function(value){
+        this.proceed(123)
       },
-      "step2" : function(value){
-        this.continue(value+1);
-      },
+      step2 : function(value){
+        this.proceed(value+1)
+      }
     })
 
     s.insertAfter("step1","step_in",function(value){
-      this.continue(value+1);
+      this.proceed(value+1)
     })
 
-    s.on 'done', function(value){
+    s.on('done', function(value){
       console.log(value)
-    }
+    })
+
+### Coffee Usage:
+
+    Sync = require("ync")
+
+    s = new Sync
+      step1 : (value) -> @proceed 123
+      step2 : (value) -> @proceed value + 1
+
+    s.insertAfter "step1", "step_in", (value) -> @proceed value + 1
+
+    s.on "done", (value) -> console.log value
 
 ### Copyrights
   * c) 2013 Sebastian Glaser <anx@ulzq.de>
