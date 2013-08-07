@@ -2,7 +2,7 @@
   "author": "Sebastian Glaser <anx@ulzq.de> (http://github.com/hakt0r/ync)",
   "name": "ync",
   "description": "simply serialize async calls",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "repository": {
     "type": "git",
     "url": "https://github.com/hakt0r/ync.git"
@@ -10,7 +10,7 @@
   "main": "./lib/ync.js",
   "scripts" : {
     "test"  : "node lib/test.js",
-    "install" : "coffee -c -o lib src/test.coffee src/ync.coffee && echo Compiled $(ls lib)"
+    "build" : "coffee -c -o lib src/test.coffee src/ync.coffee && echo Compiled $(ls lib)"
   },
   "engines": {
     "node": ">= 0.8.0"

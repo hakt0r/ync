@@ -5,7 +5,7 @@
     $ sudo npm install -g git://github.com/hakt0r/ync.git
 
 ### Node.JS Usage:
-    var Sync = require('ync');
+    var Sync = require('ync').Sync;
 
     var s = new Sync({
       step1 : function(value){
@@ -26,7 +26,7 @@
 
 ### Coffee Usage:
 
-    Sync = require("ync")
+    Sync = require("ync").Sync
 
     s = new Sync
       step1 : (value) -> @proceed 123
@@ -35,6 +35,19 @@
     s.insertAfter "step1", "step_in", (value) -> @proceed value + 1
 
     s.on "done", (value) -> console.log value
+
+    Join = require("ync").Join
+
+    r = 0
+
+    j = new Join ->
+      console.log 'all done'
+
+    for i in [0..9]
+      j.part()
+      setTimeout (->
+        j.join console.log r++
+      ), Math.random()*1000
 
 ### Copyrights
   * c) 2013 Sebastian Glaser <anx@ulzq.de>

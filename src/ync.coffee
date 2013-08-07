@@ -1,6 +1,6 @@
 ###
 
-  (S)ync - simply serialize async calls
+  (S)ync - simply serialize, defer, and join async calls
   
   c) 2013 Sebastian Glaser <anx@ulzq.de>
 
@@ -29,31 +29,40 @@ events = require 'events'
 
 class Sync extends events.EventEmitter
   constructor : (@chain) ->
-    for i in ['debug','fork']
+    for i in ['debug','fork','autorun']
       if @chain[i]?
         @[i] = @chain[i]
         delete @chain[i]
       else @[i] = false
     require 'colors' if @debug
+    @autorun = true unless @autorun?
     @current = Object.keys(@chain).shift()
-    @exec @current, []
+    @run() if @autorun
+    @exec @current, [] if @autorun
 
-  exec : (rule,args) ->
+  run : => @exec @current, []
+
+  exec : (rule,args) =>
     console.log "Executing".yellow, rule, args if @debug
-    if @fork
-      setTimeout (=>
-        @chain[rule].apply this,args
-        ), 0
-    else @chain[rule].apply this,args
+    if @fork then setTimeout (=> @chain[rule].apply this,args), 0
+    else @chain[rule].apply this, args
 
-  proceed : ->
+  proceed : =>
     if @current is @last()
       args = v for k,v of arguments
       return @emit.apply this, ['done'].concat args
     @current = @next()
     @exec @current, arguments
 
-  insertAfter : (what,name,func) ->
+  insertBefore : (what,name,func) =>
+    s = @chain; l = {}
+    keys = Object.keys(s)
+    keys = keys.concat(name,keys.splice(keys.indexOf(what)))
+    s[name] = func
+    l[k] = s[k] for k in keys
+    @chain = l
+
+  insertAfter : (what,name,func) =>
     s = @chain; l = {}
     keys = Object.keys(s)
     keys = keys.concat(name,keys.splice(keys.indexOf(what)+1))
@@ -61,13 +70,20 @@ class Sync extends events.EventEmitter
     l[k] = s[k] for k in keys
     @chain = l
 
-  next  : ->
+  next  : =>
     k = Object.keys(@chain)
     i = k.indexOf(@current)
     return k[i+1] if i+1 < k.length
 
-  first : -> return Object.keys(@chain).shift()
-  last  : -> return Object.keys(@chain).pop()
-  count : -> return Object.keys(@chain).length
+  first : => return Object.keys(@chain).shift()
+  last  : => return Object.keys(@chain).pop()
+  count : => return Object.keys(@chain).length
 
-module.exports = Sync
+module.exports.Sync = Sync
+
+class Join
+  constructor : (@done) -> @count = 0
+  part : -> @count++
+  join : -> if --@count is 0 then @done() 
+
+module.exports.Join = Join
