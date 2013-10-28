@@ -25,22 +25,34 @@
 
 ###
 
-events = require 'events'
+if window?
+  EventEmitter = class
+else
+  { EventEmitter } = require 'events'
 
-class Sync extends events.EventEmitter
+Object.merge    = (t,d) -> t[k] = d[k] for k,v of d ; t
+Object.defaults = (t,d) -> t[k] = d[k] for k,v of d when not t[k]?; t
+Object.snatch   = (o,k) ->
+  return if Array.isArray k then ( for f in k
+    t = o[f]; delete o[f]; t )
+  else ( t = o[k]; delete o[k]; t )
+
+class Sync extends EventEmitter
+  @count : 0
+
   constructor : (@chain) ->
-    for i in ['debug','fork','autorun']
-      if @chain[i]?
-        @[i] = @chain[i]
-        delete @chain[i]
-      else @[i] = false
-    require 'colors' if @debug
-    @autorun = true unless @autorun?
+    @id = Sync.count++
+    @chain = Object.defaults @chain, debug : false, fork : false, run : true, title : "Sync-" + @id
+    [ @debug, @fork, run, @title ] = Object.snatch @chain, ['debug','fork','run','title']
+    if @debug
+      require 'colors'
+      console.log "new".yellow, "Sync".blue, @title.red, Object.keys @chain 
     @current = Object.keys(@chain).shift()
-    @run() if @autorun
-    @exec @current, [] if @autorun
+    @exec @current, [] if run
 
-  run : => @exec @current, []
+  run : (rule) =>
+    @current = rule if rule?
+    @exec @current, []
 
   exec : (rule,args) =>
     console.log "Executing".yellow, rule, args if @debug
@@ -79,11 +91,21 @@ class Sync extends events.EventEmitter
   last  : => return Object.keys(@chain).pop()
   count : => return Object.keys(@chain).length
 
-module.exports.Sync = Sync
 
 class Join
-  constructor : (@done) -> @count = 0
-  part : -> @count++
-  join : -> if --@count is 0 then @done() 
+  @ids = 0
+  constructor : (@done) ->
+    @id = Join.ids++
+    @count = 0
+  part : (arg) =>
+    arg() if (t = typeof arg) is 'function'
+    @count++
+  join : =>
+    if --@count is 0 then @done() 
 
-module.exports.Join = Join
+if window?
+  window.Sync = Sync
+  window.Join = Join
+else
+  module.exports.Sync = Sync
+  module.exports.Join = Join
