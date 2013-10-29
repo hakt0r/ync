@@ -25,10 +25,9 @@
 
 ###
 
-if window?
-  EventEmitter = class
-else
+if module? and module.exports?
   { EventEmitter } = require 'events'
+else EventEmitter = class
 
 Object.merge    = (t,d) -> t[k] = d[k] for k,v of d ; t
 Object.defaults = (t,d) -> t[k] = d[k] for k,v of d when not t[k]?; t
@@ -91,7 +90,6 @@ class Sync extends EventEmitter
   last  : => return Object.keys(@chain).pop()
   count : => return Object.keys(@chain).length
 
-
 class Join
   @ids = 0
   constructor : (@done) ->
@@ -106,6 +104,7 @@ class Join
 if window?
   window.Sync = Sync
   window.Join = Join
-else
+
+if module? and module.exports?
   module.exports.Sync = Sync
   module.exports.Join = Join
