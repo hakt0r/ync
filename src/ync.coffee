@@ -98,12 +98,11 @@ class Join
     @id = Join.ids++
     @count = 0
     @part() if @block
-  end : (@done) => @join()
   part : (arg) =>
-    arg() if (t = typeof arg) is 'function'
     @count++
-  join : =>
-    if --@count is 0 then @done() 
+    setTimeout arg, 0 if typeof arg is 'function'
+  join : => if --@count is 0 then @done() 
+  end  : (@done) => @join()
 
 if window?
   window.Sync = Sync
