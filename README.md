@@ -1,5 +1,7 @@
 ## ync - simply serialize async calls
 
+a dumber lighter alternative to some cases of async.
+
 ### Installation
     $ sudo npm ync (TODO: publish)
     $ sudo npm install -g git://github.com/hakt0r/ync.git
@@ -26,6 +28,8 @@
 
 ### Coffee Usage:
 
+#### Sync
+
     Sync = require("ync").Sync
 
     s = new Sync
@@ -36,10 +40,10 @@
 
     s.on "done", (value) -> console.log value
 
+#### Join
+
     Join = require("ync").Join
-
     r = 0
-
     j = new Join ->
       console.log 'all done'
 
@@ -48,6 +52,15 @@
       setTimeout (->
         j.join console.log r++
       ), Math.random()*1000
+
+#### Join.end()
+
+  j = new Join true, -> console.log 'done'
+  j.part(); j.join();
+  # this would usually trigger the callback
+  j.part (setTimeout j.join, 1000)
+  j.end() # optionally you can add the done callback here
+  # instead of specifying it in the constructor
 
 ### Copyrights
   * c) 2013 Sebastian Glaser <anx@ulzq.de>
