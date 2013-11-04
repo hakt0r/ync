@@ -92,9 +92,13 @@ class Sync extends EventEmitter
 
 class Join
   @ids = 0
-  constructor : (@done) ->
+  constructor : (@block, @done) ->
+    @done = @block if typeof @block is 'function'
+    @block = false unless typeof @block is 'boolean'
     @id = Join.ids++
     @count = 0
+    @part() if @block
+  end : (@done) => @join()
   part : (arg) =>
     arg() if (t = typeof arg) is 'function'
     @count++
