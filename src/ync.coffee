@@ -42,7 +42,7 @@ class Sync extends EventEmitter
   constructor : (@chain) ->
     @id = Sync.count++
     @chain = Object.defaults @chain, debug : false, fork : false, run : true, title : "Sync-" + @id
-    [ @debug, @fork, run, @title ] = Object.snatch @chain, ['debug','fork','run','title']
+    [ @debug, @fork, run, @title, @onexec ] = Object.snatch @chain, ['debug','fork','run','title','onexec']
     if @debug
       require 'colors'
       console.log "new".yellow, "Sync".blue, @title.red, Object.keys @chain 
@@ -55,6 +55,7 @@ class Sync extends EventEmitter
 
   exec : (rule,args) =>
     console.log "Executing".yellow, rule, args if @debug
+    @onexec rule, @chain[rule] if @onexec
     if @fork then setTimeout (=> @chain[rule].apply this,args), 0
     else @chain[rule].apply this, args
 
@@ -91,7 +92,7 @@ class Sync extends EventEmitter
   count : => return Object.keys(@chain).length
 
 class Join
-  @ids = 0
+  @ids : 0
   constructor : (@block, @done) ->
     @done = @block if typeof @block is 'function'
     @block = false unless typeof @block is 'boolean'
@@ -102,7 +103,7 @@ class Join
     @count++
     setTimeout arg, 0 if typeof arg is 'function'
   join : => if --@count is 0 then @done() 
-  end  : (@done) => @join()
+  end : (@done) => @join()
 
 if window?
   window.Sync = Sync

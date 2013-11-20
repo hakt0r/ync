@@ -25,7 +25,7 @@
 
 ###
 
-Sync = require './ync'
+{ Sync, Join } = require './ync'
 cp = require 'child_process'
 require 'colors'
 
